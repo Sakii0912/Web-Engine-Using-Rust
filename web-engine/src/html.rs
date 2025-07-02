@@ -124,3 +124,27 @@ fn parse_attributes(&mut self) -> dom::AttrMap {
     return attributes;
 }
 
+// Parse a sequence of sibling nodes.
+fn parse_nodes(&mut self) -> Vec<dom::Node> {
+    let mut nodes = Vec::new();
+    loop {
+        self.consume_whitespace();
+        if self.eof() || self.starts_with("</") {
+            break;
+        }
+        nodes.push(self.parse_node());
+    }
+    return nodes;
+}
+
+// Parse an HTML document and return the root element.
+pub fn parse(source: String) -> dom::Node {
+    let mut nodes = Parser { pos: 0, input: source }.parse_nodes();
+
+    // If the document contains a root element, just return it. Otherwise, create one.
+    if nodes.len() == 1 {
+        return nodes.remove(0);
+    } else {
+        return dom::elem("html".to_string(), HashMap::new(), nodes);
+    }
+}
