@@ -5,22 +5,22 @@ struct Parser {
 
 impl Parser {
     // Read the current character without consuming it.
-    fn next_char(&self) -> char {
-        self.input[self.pos..].chars().next().unwrap()
+    fn next_char(&self) -> char {                       // [self.pos..] is a slice of the input string starting from the current position.
+        self.input[self.pos..].chars().next().unwrap()  // .chars().next returns and Option type, which needs to be unwrapped to get the next character.
     }
 
     // Do the next characters start with the given string?
     fn starts_with(&self, s: &str) -> bool {
-        self.input[self.pos ..].starts_with(s)
+        self.input[self.pos ..].starts_with(s) // bool for if s is the starting of input from pos
     }
 
     // If the exact string `s` is found at the current position, consume it.
     // Otherwise, panic.
     fn expect(&mut self, s: &str) {
         if self.starts_with(s) {
-            self.pos += s.len();
+            self.pos += s.len();    // if the string is found, we advance the position by the length of the string.
         } else {
-            panic!("Expected {:?} at byte {} but it was not found", s, self.pos);
+            panic!("Expected {:?} at byte {} but it was not found", s, self.pos); // else panic with an error message.
         }
     }
 
@@ -33,14 +33,14 @@ impl Parser {
 }
 
 // Return the current character, and advance self.pos to the next character.
-fn consume_char(&mut self) -> char {
+fn consume_char(&mut self) -> char { // read the car and return it, then increment the position
     let c = self.next_char();
     self.pos += c.len_utf8();
     return c;
 }
 
 // Consume characters until `test` returns false.
-fn consume_while(&mut self, test: impl Fn(char) -> bool) -> String {
+fn consume_while(&mut self, test: impl Fn(char) -> bool) -> String { // while characters are still there, keep reading and return the whole thing. Fn is a trait for functions that take a char and return a bool, hence capitalized (even types are capitalized).
     let mut result = String::new();
     while !self.eof() && test(self.next_char()) {
         result.push(self.consume_char());
@@ -53,11 +53,12 @@ fn consume_whitespace(&mut self) {
     self.consume_while(char::is_whitespace);
 }
 
+// from here we start the actual parsing functions. All of them are quite intuitive
+
 // Parse a tag or attribute name.
 fn parse_name(&mut self) -> String {
     self.consume_while(|c| matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9'))
 }
-Now we’re ready to start parsing HTML. To parse a single node, we look at its first character to see if it is an element or a text node.
 
 // Parse a single node.
 fn parse_node(&mut self) -> dom::Node {
